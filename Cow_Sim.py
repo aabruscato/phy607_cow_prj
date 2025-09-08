@@ -5,23 +5,42 @@ import pandas as pd
 # Claire O'Connor & Amelia Abruscato
 # Polonius the Projectile Cow Simulator Python Program
 
-def main(): # main function
-    print("main")
+def main():
 
-# INITIAL CONDITIONS AND CONSTANTS
-mass = 1000
-a_g = 9.81
+    # Initial conditions and constants
+    mass = 1000
+    g = 9.81
+    xo = 0
+    time = 0
 
-h = 80
-pos = np.array([0, h])
+    # Variables
+    h = 80
+    Cd = 1  # drag constant
+    del_t = 0.0001  # time step
+    vox = 5
+    voy = 6
 
-vel_ox = 4
-vel_oy = 3
-vel = np.array([vel_ox, vel_oy])
+    # Vectors
+    pos = np.array([xo, h])
+    vel = np.array([vox, voy])
 
-C_d = 1
+    # Functions
+    def total_force(vel):
+        Fg = np.array([0, -mass * g])
+        Fd = np.array([-Cd * vel[0] ** 2, -Cd * vel[1] ** 2])
+        F = np.array([Fg[0] + Fd[0], Fg[1] + Fd[1]])
+        return F
 
-time = 0
-del_t = 0.1
+    #def moment_later(pos, vel, del_t):
 
+
+    #def energy(pos, vel):
+
+
+
+
+
+
+if __name__ == "__main__":
+    main()
 
