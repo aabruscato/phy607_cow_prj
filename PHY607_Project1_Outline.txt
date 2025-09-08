@@ -2,3 +2,40 @@ Claire O'Connor & Amelia Abruscato
 PHY607 
 Falling Cow Simulator
 
+---------Empty vars ---------
+ - Position Array: pos_arr
+ - Velocity Array: vel_arr
+Energy Array #Could be calculated with position and velocity array, but why make another for loop if we don’t have to
+
+---------User inputs initial condition:---------
+ - Position: pos = [pos_x, pos_y] = [0, h]
+ - Velocity: vel = [vel_x, vel_y]
+ - Drag constant: C_d
+ - Time: time = 0
+ - Delta_t (time step): delta_t
+ - Mass: mass
+ - Acceleration due to gravity: a_g = -9.81
+ - Set constants of m = 1000 kg and the acceleration due to gravity as g = -9.81 m/s^2
+
+---------Calculate from initial conditions---------
+ - Drag force: F_d = [-C_d * vel_x * abs(vel_x), -C_d * vel_y * abs(vel_y)]  #direction should be opposite to velocity
+ - Gravity force F_g = [0, mass * a_g]  #array not necessary since F_g,x is always zero
+ - Total Force: F_total = [F_dx + F_gx, F_dy + F_gy]
+ - Acceleration; acc = [acc_x, acc_y] = [F_tx /m, F_ty / m]
+
+---------While the objects height is not below zero, calculate the new values---------
+ - Time: time = time = delta_t
+ - Position: pos = [pos_x + vel_x * delta_t, pos_y + vel_y * delta_t]
+ - Velocity: vel = [vel_x + acc_x * delta_t, vel_y + acc_y * delta_t]
+ - Drag Force #same as previous
+ - Total Force #same as previous 
+ - Acceleration #same as previous
+ 
+ #Eventually
+ - Potential Energy
+ - Kinetic Energy
+ - Total Energy E = T + U
+
+---------Plot position, velocity, and energy as a function of the time step---------
+matplotlib
+
