@@ -10,6 +10,12 @@ def msg(lvl, msg):
     if lvl<msg_lvl:
         print(msg)
 
+def write_pos(time_arr, position_arr):
+    f = open("position.out, "w")
+    for time in time_arr:
+        print()
+    
+
 def main():
 
     # Config
