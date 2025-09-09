@@ -11,9 +11,11 @@ def msg(lvl, msg):
         print(msg)
 
 def write_pos(time_arr, position_arr):
-    f = open("position.out, "w")
+    f = open("position.out", "w")
+    i=0
     for time in time_arr:
-        print()
+        f.write(f"{time} {position_arr[i][0]} {position_arr[i][1]} \n")
+        i=i+1
     
 
 def main():
@@ -64,6 +66,7 @@ def main():
     VELOCITY = []
     TIME = []
     ENERGY = []
+    position_arr = []
 
     while pos[1] > 0:
 
@@ -73,7 +76,9 @@ def main():
         KE, PE, E = energy(pos, vel)
 
         # STORING DATA
+        
         POSITION.append(np.linalg.norm(pos))
+        position_arr.append(pos)
         VELOCITY.append(np.linalg.norm(vel))
         TIME.append(time)
         ENERGY.append(E)
@@ -82,6 +87,7 @@ def main():
 
         msg(5, f"Time: {time:.4f}, Position: {pos}, Velocity: {vel}, KE: {KE:.2f}, PE: {PE:.2f}, Total Energy: {E:.2f}")
     
+    write_pos(TIME, position_arr)
     
     Position = np.array(POSITION)
     Velocity = np.array(VELOCITY)
