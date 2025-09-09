@@ -4,36 +4,47 @@ import matplotlib.pyplot as plt
 # Claire O'Connor & Amelia Abruscato
 # Polonius the Projectile Cow Simulator Python Program
 
-def main():
+    # Debugging
+    msg_lvl = 2
+    def msg(lvl, msg):
+    if lvl>msg_lvl:
+        print(msg)
 
-    # Initial conditions and constants
+    def main():
+
+    # Config
+    DisplayWithOffset = True # If set to True displays Energy graph with offset vertical axis
+    UserInput = False ### possibly add user input option for more convienent experimentation
+
+    # User Inputs
     mass = 1000
-    g = 9.81
-    xo = 0
-    time = 0
-
-    # Variables
-    h = 80
-    Cd = 1  # drag constant
-    delt = 0.0001  # time step
+    yo = 80
+    Cd = 0  # drag constant
+    del_t = 0.0001  # time step
     vox = 5
     voy = 6
 
+    # Initial conditions and constants
+    g = 9.81
+    xo = 0
+    time = 0
+    Fg = -mass * g
+
     # Vectors
-    pos = np.array([xo, h])
+    pos = np.array([xo, yo])
     vel = np.array([vox, voy])
 
     # Functions
-    def total_force(vel):
-        Fg = np.array([0, -mass * g])
-        Fd = np.array([-Cd * vel[0] ** 2, -Cd * vel[1] ** 2])
-        F = np.array([Fg[0] + Fd[0], Fg[1] + Fd[1]])
+    def total_force(vel=vel, Fg=Fg):
+        Fd = np.array([-Cd * vel[0] * np.absolute(vel[0]), -Cd * vel[1] * np.absolute(vel[1])])
+        F = np.array([Fd[0], Fg + Fd[1]])
         return F
 
-    def moment_later(pos, vel, F, del_t):
+    def moment_later(Force, position=pos, velocity=vel, delta_t=del_t):
         a = np.array([F[0]/mass,F[1]/mass])
-        post = np.array([pos[0] + vel[0] * delt, pos[1] + vel[1] * delt])
-        velt = np.array([vel[0] + a[0] * delt, vel[1] + a[1] * delt])
+        post = np.array([pos[0] + vel[0] * del_t, pos[1] + vel[1] * del_t])
+        velt = np.array([vel[0] + a[0] * del_t, vel[1] + a[1] * del_t])
+        
         return post, velt
 
     def energy(pos, vel):
@@ -51,8 +62,8 @@ def main():
     while pos[1] > 0:
 
         # Calculating force, position, velocity, and energy of Polonius @ an instant
-        F = total_force(vel)
-        pos, vel = moment_later(pos, vel, F, delt)
+        F = total_force()
+        pos, vel = moment_later(F)
         KE, PE, E = energy(pos, vel)
 
         # STORING DATA
@@ -61,15 +72,16 @@ def main():
         TIME.append(time)
         ENERGY.append(E)
 
-        time += delt
+        time += del_t
 
-        print(f"Time: {time:.4f}, Position: {pos}, Velocity: {vel}, KE: {KE:.2f}, PE: {PE:.2f}, Total Energy: {E:.2f}")
-
+        msg(5, f"Time: {time:.4f}, Position: {pos}, Velocity: {vel}, KE: {KE:.2f}, PE: {PE:.2f}, Total Energy: {E:.2f}")
+    
+    
     Position = np.array(POSITION)
     Velocity = np.array(VELOCITY)
     Time = np.array(TIME)
     Energy = np.array(ENERGY)
-
+    
     # PLOTTING DATA
     plt.figure(figsize=(12, 10))
 
@@ -95,12 +107,13 @@ def main():
     plt.xlabel('Time (s)')
     plt.ylabel('Energy (J)')
     plt.title('Energy vs Time')
-    plt.ticklabel_format(style='sci', axis='y', scilimits=(-3, 3))
+    plt.ticklabel_format(style='plain', axis='y', useOffset=False) #scilimits=(-3, 3))
     plt.legend()
-
+    if DisplayWithOffset:{plt.ylim(0, 900000)}
+    plt.ticklabel_format(style='sci', axis='y', useOffset=DisplayWithOffset) #scilimits=(-3, 3))
     plt.tight_layout()
 
-    #plt.show()
+    plt.show()
     plt.savefig('cow_simulation_plot.png', dpi=300)
 
 if __name__ == "__main__":
