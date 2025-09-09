@@ -3,14 +3,14 @@ import matplotlib.pyplot as plt
 # Packages used ^
 # Claire O'Connor & Amelia Abruscato
 # Polonius the Projectile Cow Simulator Python Program
-
-    # Debugging
-    msg_lvl = 2
-    def msg(lvl, msg):
-    if lvl>msg_lvl:
+    
+# Debugging
+msg_lvl = 2
+def msg(lvl, msg):
+    if lvl<msg_lvl:
         print(msg)
 
-    def main():
+def main():
 
     # Config
     DisplayWithOffset = True # If set to True displays Energy graph with offset vertical axis
