@@ -95,7 +95,7 @@ def main():
     Energy = np.array(ENERGY)
     
     # PLOTTING DATA
-    plt.figure(figsize=(12, 10))
+    '''plt.figure(figsize=(12, 10))
 
     # Position vs Time
     plt.subplot(3, 1, 1)
@@ -125,8 +125,17 @@ def main():
     plt.ticklabel_format(style='sci', axis='y', useOffset=DisplayWithOffset) #scilimits=(-3, 3))
     plt.tight_layout()
 
-    plt.show()
-    plt.savefig('cow_simulation_plot.png', dpi=300)
+    #plt.show()
+    plt.savefig('cow_simulation_plot1.png', dpi=300)'''
+
+    # Plotting y vs x position using time step + analytical solution
+    plt.plot(position_arr[1], position_arr[0], label="y vs x Position", color="black")
+    plt.xlabel('x Position (m)')
+    plt.ylabel('y Position (m)')
+    plt.title('y vs x Position')
+    plt.legend()
+
+    plt.savefig("yvx.png", dpi=300)
 
 if __name__ == "__main__":
     main()
