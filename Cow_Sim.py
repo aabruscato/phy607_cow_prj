@@ -3,140 +3,134 @@ import matplotlib.pyplot as plt
 # Packages used ^
 # Claire O'Connor & Amelia Abruscato
 # Polonius the Projectile Cow Simulator Python Program
-    
-# Debugging
+
+# INITIAL CONDITIONS & CONSTANTS
+m = 1000
+cd = 0       # drag coefficient
+xo = 0
+yo = 1000
+vox = 1
+voy = 100
+dt = 0.1
+g = 9.81
+
+# DEBUGGING
 msg_lvl = 2
-def msg(lvl, msg):
-    if lvl<msg_lvl:
+def msg(level, msg):
+    if level < msg_lvl:
         print(msg)
 
-def write_pos(time_arr, position_arr):
-    f = open("position.out", "w")
-    i=0
-    for time in time_arr:
-        f.write(f"{time} {position_arr[i][0]} {position_arr[i][1]} \n")
-        i=i+1
-    
+# SIMULATION FUNCTIONS
+def analytic_trajectory(x_arr, xo, yo, vox, voy, g):
+    return yo + (voy / vox) * (x_arr - xo) - (0.5 * g / vox**2) * (x_arr - xo)**2
 
-def main():
+def calculate_drag_force(velocity):
+    return np.array([-cd * velocity[0] * abs(velocity[0]),
+                     -cd * velocity[1] * abs(velocity[1])])
 
-    # Config
-    DisplayWithOffset = True # If set to True displays Energy graph with offset vertical axis
-    UserInput = False ### possibly add user input option for more convienent experimentation
+def total_force(velocity):
+    Fd = calculate_drag_force(velocity)
+    Fg = -m * g
+    return np.array([Fd[0], Fd[1] + Fg])
 
-    # User Inputs
-    mass = 1000
-    yo = 80
-    Cd = 0  # drag constant
-    del_t = 0.0001  # time step
-    vox = 5
-    voy = 6
+def moment_later(position, velocity, force, dt):
+    acceleration = force / m
+    new_pos = position + velocity * dt
+    new_vel = velocity + acceleration * dt
+    return new_pos, new_vel
 
-    # Initial conditions and constants
-    g = 9.81
-    xo = 0
-    time = 0
-    Fg = -mass * g
+def calculate_energy(position, velocity):
+    KE = 0.5 * m * np.sum(velocity**2)
+    PE = m * g * position[1]
+    E = KE + PE
+    return KE, PE, E
 
-    # Vectors
-    pos = np.array([xo, yo])
-    vel = np.array([vox, voy])
+def write_positions(times, positions, filename="position.out"):
+    with open(filename, "w") as f:
+        for t, pos in zip(times, positions):
+            f.write(f"{t:.5f} {pos[0]:.5f} {pos[1]:.5f}\n")
 
-    # Functions
-    def total_force(vel=vel, Fg=Fg):
-        Fd = np.array([-Cd * vel[0] * np.absolute(vel[0]), -Cd * vel[1] * np.absolute(vel[1])])
-        F = np.array([Fd[0], Fg + Fd[1]])
-        return F
+def run_simulation():
+    position = np.array([xo, yo], dtype=float)
+    velocity = np.array([vox, voy], dtype=float)
+    time = 0.0
 
-    def moment_later(Force, position=pos, velocity=vel, delta_t=del_t):
-        a = np.array([F[0]/mass,F[1]/mass])
-        post = np.array([pos[0] + vel[0] * del_t, pos[1] + vel[1] * del_t])
-        velt = np.array([vel[0] + a[0] * del_t, vel[1] + a[1] * del_t])
-        
-        return post, velt
+    # STORING DATA
+    times, positions, velocities = [], [], []
+    kinetic_energy, potential_energy, total_energy = [], [], []
 
-    def energy(pos, vel):
-        KE = 0.5 * mass * (vel[0]**2 + vel[1]**2)
-        PE = mass * g * pos[1]
-        E = KE + PE
-        return KE, PE, E
+    while position[1] > 0:
+        force = total_force(velocity)
+        position, velocity = moment_later(position, velocity, force, dt)
+        ke, pe, te = calculate_energy(position, velocity)
 
-    # DATA COLLECTION LISTS
-    POSITION = []
-    VELOCITY = []
-    TIME = []
-    ENERGY = []
-    position_arr = []
+        times.append(time)
+        positions.append(position.copy())
+        velocities.append(np.linalg.norm(velocity))
+        kinetic_energy.append(ke)
+        potential_energy.append(pe)
+        total_energy.append(te)
 
-    while pos[1] > 0:
+        time += dt
+        msg(5, f"Time: {time:.4f}, Pos: {position}, Vel: {velocity}, KE: {ke:.2f}, PE: {pe:.2f}, E: {te:.2f}")
 
-        # Calculating force, position, velocity, and energy of Polonius @ an instant
-        F = total_force()
-        pos, vel = moment_later(F)
-        KE, PE, E = energy(pos, vel)
+    return np.array(times), np.array(positions), np.array(kinetic_energy), np.array(potential_energy), np.array(total_energy)
 
-        # STORING DATA
-        
-        POSITION.append(np.linalg.norm(pos))
-        position_arr.append(pos)
-        VELOCITY.append(np.linalg.norm(vel))
-        TIME.append(time)
-        ENERGY.append(E)
+# PLOTTING
+def plot_results(times, positions, kinetic, potential, total, xo, yo, vox, voy, g, dt):
+    x_vals = positions[:, 0]
+    y_vals = positions[:, 1]
 
-        time += del_t
+    # TRAJECTORY
+    fig1, ax1 = plt.subplots(figsize=(8, 6))
 
-        msg(5, f"Time: {time:.4f}, Position: {pos}, Velocity: {vel}, KE: {KE:.2f}, PE: {PE:.2f}, Total Energy: {E:.2f}")
-    
-    write_pos(TIME, position_arr)
-    
-    Position = np.array(POSITION)
-    Velocity = np.array(VELOCITY)
-    Time = np.array(TIME)
-    Energy = np.array(ENERGY)
-    
-    # PLOTTING DATA
-    '''plt.figure(figsize=(12, 10))
+    ax1.plot(x_vals, y_vals, label="Numeric", color="blue")
 
-    # Position vs Time
-    plt.subplot(3, 1, 1)
-    plt.plot(Time, Position, label='Position', color='blue')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Position (m)')
-    plt.title('Position vs Time')
-    plt.legend()
+    x_analytic = np.linspace(xo, x_vals[-1], 500)
+    y_analytic = analytic_trajectory(x_analytic, xo, yo, vox, voy, g)
+    ax1.plot(x_analytic, y_analytic, '--', label="Analytic", color="red")
 
-    # Velocity vs Time
-    plt.subplot(3, 1, 2)
-    plt.plot(Time, Velocity, label='Velocity', color='red')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Velocity (m/s)')
-    plt.title('Velocity vs Time')
-    plt.legend()
+    ax1.set_xlabel("x (m)")
+    ax1.set_ylabel("y (m)")
+    ax1.set_title("y vs x (no drag)")
+    ax1.set_ylim(bottom=0)
+    ax1.legend()
+    ax1.text(
+        0.05, 0.95,  # x and y in *axes fraction* (0 to 1)
+        f"dt = {dt}",  # Text string
+        transform=ax1.transAxes,  # Use axes coordinates
+        fontsize=10,
+        verticalalignment='top',
+        bbox=dict(boxstyle="round", facecolor="white", alpha=0.5)
+    )
+    ax1.grid()
 
-    # Energy vs Time
-    plt.subplot(3, 1, 3)
-    plt.plot(Time, Energy, label='Total Energy', color='green')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Energy (J)')
-    plt.title('Energy vs Time')
-    plt.ticklabel_format(style='plain', axis='y', useOffset=False) #scilimits=(-3, 3))
-    plt.legend()
-    if DisplayWithOffset:{plt.ylim(0, 900000)}
-    plt.ticklabel_format(style='sci', axis='y', useOffset=DisplayWithOffset) #scilimits=(-3, 3))
     plt.tight_layout()
+    fig1.savefig(f"trajectory_dt_{dt}.png", dpi=300)
+    plt.close(fig1)  # Close figure after saving to avoid overlap
 
-    #plt.show()
-    plt.savefig('cow_simulation_plot1.png', dpi=300)'''
+    # ENERGY
+    fig2, ax2 = plt.subplots(figsize=(8, 6))
 
-    # Plotting y vs x position using time step + analytical solution
-    plt.plot(position_arr[1], position_arr[0], label="y vs x Position", color="black")
-    plt.xlabel('x Position (m)')
-    plt.ylabel('y Position (m)')
-    plt.title('y vs x Position')
-    plt.legend()
+    ax2.plot(times, kinetic, label="Kinetic", color="blue")
+    ax2.plot(times, potential, label="Potential", color="orange")
+    ax2.plot(times, total, label="Total", color="green")
 
-    plt.savefig("yvx.png", dpi=300)
+    ax2.set_xlabel("Time (s)")
+    ax2.set_ylabel("Energy (J)")
+    ax2.set_title(f"Energy vs Time")
+    ax2.legend()
+    ax2.grid()
+
+    plt.tight_layout()
+    fig2.savefig("energy.png", dpi=300)
+    plt.close(fig2)  # Close figure to free memory
+
+# MAIN
+def main():
+    times, positions, kinetic, potential, total = run_simulation()
+    write_positions(times, positions)
+    plot_results(times, positions, kinetic, potential, total, xo, yo, vox, voy, g, dt)
 
 if __name__ == "__main__":
     main()
-
