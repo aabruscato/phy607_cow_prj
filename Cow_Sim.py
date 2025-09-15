@@ -22,6 +22,8 @@ def msg(level, msg):
 
 # SIMULATION FUNCTIONS
 def analytic_trajectory(x_arr, xo, yo, vox, voy, g):
+    # take initial position in two axes (xo and yo), x_arr is the array of x positions, vox is the initial velocity in the x direction, voy same in y direction
+    #this is basically y in terms of x (making a quadratic out of it, removing time)
     return yo + (voy / vox) * (x_arr - xo) - (0.5 * g / vox**2) * (x_arr - xo)**2
 
 def calculate_drag_force(velocity):
