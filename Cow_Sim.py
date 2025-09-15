@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 # Packages used ^
-# Claire O'Connor & Amelia Abruscato
+# Claire O'Connor, Amelia Abruscato & Shreyan Goswami
 # Polonius the Projectile Cow Simulator Python Program
 
 # INITIAL CONDITIONS & CONSTANTS
@@ -27,27 +27,32 @@ def analytic_trajectory(x_arr, xo, yo, vox, voy, g):
     return yo + (voy / vox) * (x_arr - xo) - (0.5 * g / vox**2) * (x_arr - xo)**2
 
 def calculate_drag_force(velocity):
+    #calculating drag force by multiplying velocity with the drag coefficient
     return np.array([-cd * velocity[0] * abs(velocity[0]),
                      -cd * velocity[1] * abs(velocity[1])])
 
 def total_force(velocity):
+    #adding the force due to g and drag
     Fd = calculate_drag_force(velocity)
     Fg = -m * g
     return np.array([Fd[0], Fd[1] + Fg])
 
 def moment_later(position, velocity, force, dt):
+    #finding the new posotion and velocity 
     acceleration = force / m
     new_pos = position + velocity * dt
     new_vel = velocity + acceleration * dt
     return new_pos, new_vel
 
 def calculate_energy(position, velocity):
+    #using standard formulae to find Kinetic and Potential Energy.
     KE = 0.5 * m * np.sum(velocity**2)
     PE = m * g * position[1]
     E = KE + PE
     return KE, PE, E
 
 def write_positions(times, positions, filename="position.out"):
+    #entering the positions into position.out file
     with open(filename, "w") as f:
         for t, pos in zip(times, positions):
             f.write(f"{t:.5f} {pos[0]:.5f} {pos[1]:.5f}\n")
@@ -61,6 +66,7 @@ def run_simulation():
     times, positions, velocities = [], [], []
     kinetic_energy, potential_energy, total_energy = [], [], []
 
+#making a loop to ensure that it runs till position is 0
     while position[1] > 0:
         force = total_force(velocity)
         position, velocity = moment_later(position, velocity, force, dt)
@@ -91,7 +97,7 @@ def plot_results(times, positions, kinetic, potential, total, xo, yo, vox, voy, 
     x_analytic = np.linspace(xo, x_vals[-1], 500)
     y_analytic = analytic_trajectory(x_analytic, xo, yo, vox, voy, g)
     ax1.plot(x_analytic, y_analytic, '--', label="Analytic", color="red")
-
+    #plot specs
     ax1.set_xlabel("x (m)")
     ax1.set_ylabel("y (m)")
     ax1.set_title("y vs x (no drag)")
@@ -128,7 +134,7 @@ def plot_results(times, positions, kinetic, potential, total, xo, yo, vox, voy, 
     fig2.savefig("energy.png", dpi=300)
     plt.close(fig2)  # Close figure to free memory
 
-# MAIN
+# MAIN FUNCTION
 def main():
     times, positions, kinetic, potential, total = run_simulation()
     write_positions(times, positions)
